@@ -13,7 +13,10 @@ if context.config.config_file_name is not None:
     fileConfig(context.config.config_file_name)
 
 from app.database import Base, DATABASE_URL
+from app.chats import models
 from app.users import models 
+from app.messages import models
+from app.attachments import models
 
 target_metadata = Base.metadata
 

@@ -20,6 +20,9 @@ class LoginEmail(BaseModel):
     email: EmailStr
     password: str
 
+class RegisterMessage(BaseModel):
+    message: str
+
 class TokenData(BaseModel):
     user_id: str | None
     

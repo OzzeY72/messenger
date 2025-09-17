@@ -6,10 +6,10 @@ from .service import AuthService
 
 router = APIRouter()
 
-@router.post("/register/email", response_model=schemas.Token)
+@router.post("/register/email", response_model=schemas.RegisterMessage)
 async def register_email(data: schemas.RegisterEmail, db: AsyncSession = Depends(get_db)):
     user = await AuthService(db).register_email(data)
-    return {"User successfully registrated"}
+    return {"message": "User successfully registrated"}
 
 @router.post("/login/email", response_model=schemas.Token)
 async def login_email(data: schemas.LoginEmail, db: AsyncSession = Depends(get_db)):
