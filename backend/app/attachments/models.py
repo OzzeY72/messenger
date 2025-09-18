@@ -14,6 +14,7 @@ class Attachment(Base):
     message_id = Column(UUID(as_uuid=True), ForeignKey("messages.id", ondelete="CASCADE"), nullable=False)
     file_path = Column(String, nullable=False) 
     file_type = Column(String, nullable=True)
+    file_size = Column(String, nullable=False, default="0")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     message = relationship("Message", back_populates="attachments")

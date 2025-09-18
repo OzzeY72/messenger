@@ -23,12 +23,8 @@ async def create_chat(
 
     service = ChatService(db)
     chat = await service.create_chat(chat_in)
-    return ChatRead(
-        id=chat.id,
-        name=chat.name,
-        members=chat_in.user_ids,
-        created_at=chat.created_at,
-    )
+    ret = await service.get_chat_for_user(chat.id, current_user.id)
+    return ret
 
 @router.get("/", response_model=list[ChatRead])
 async def get_my_chats(

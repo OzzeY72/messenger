@@ -49,9 +49,12 @@ async def upload_attachment(
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
 
+    file_size = str(os.path.getsize(file_path))
+
     repo = AttachmentRepository(db)
     return await repo.create(
         message_id=message_id,
         file_path=file_path,
-        file_type=file.content_type
+        file_type=file.content_type,
+        file_size=file_size
     )

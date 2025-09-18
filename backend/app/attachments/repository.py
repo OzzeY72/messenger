@@ -10,11 +10,12 @@ class AttachmentRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, message_id, file_path, file_type=None):
+    async def create(self, message_id, file_path, file_size, file_type=None):
         attachment = Attachment(
             message_id=message_id,
             file_path=file_path,
             file_type=file_type,
+            file_size=file_size
         )
         self.db.add(attachment)
         await self.db.commit()

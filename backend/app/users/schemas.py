@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -10,7 +11,7 @@ class UserCreate(UserBase):
     hashed_password: str | None 
 
 class UserRead(UserBase):
-    id: int
+    id: UUID
 
     class Config:
         orm_mode = True

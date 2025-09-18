@@ -10,6 +10,7 @@ class AttachmentRead(BaseModel):
     message_id: UUID
     file_path: str
     file_type: str | None
+    file_size: str
     created_at: datetime
 
     class Config:
