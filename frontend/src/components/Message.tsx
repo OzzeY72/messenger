@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Edit3, Trash2, Download, User, Check, X } from 'lucide-react';
-import type { Message as MessageType } from '../types';
+import { Check, Edit3, Trash2, User, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { userAPI } from '../api/user';
 import { useAuth } from '../hooks/useAuth';
 import { useChat } from '../hooks/useChat';
-import { attachmentAPI } from '../api/attachment';
+import type { Message as MessageType } from '../types';
 import Attachment from './Attachment';
 
 interface MessageProps {
@@ -15,9 +15,28 @@ const Message: React.FC<MessageProps> = ({ message }) => {
   const { updateMessage, deleteMessage } = useChat();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
+  const [owner, setOwner] = useState<typeof User>();
   
   const isOwner = message.sender_id === authState.user?.id;
   
+  useEffect(() => {
+  const fetchOwner = async () => {
+      try {
+        const user = await userAPI.getUserById(message.sender_id);
+          setOwner(user as any);
+      } catch (error) {
+        console.error('Error while loading owner:', error);
+      }
+    };
+
+    if (message.sender_id) {
+      fetchOwner();
+    }
+
+    return () => {
+    };
+  }, [message.sender_id]);
+
   const handleEdit = async () => {
     if (editContent.trim() === message.content) {
       setIsEditing(false);
@@ -60,7 +79,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
           {!isOwner && (
             <div className="flex items-center space-x-2 mb-1">
               <User className="w-4 h-4 text-gray-500" />
-              <span className="text-xs text-gray-500">Собеседник</span>
+              <span className="text-xs text-gray-500">{owner?.name!}</span>
             </div>
           )}
           

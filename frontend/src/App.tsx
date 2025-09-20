@@ -1,9 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
-import Login from './pages/Login';
 import ChatPage from './pages/ChatPage';
+import GoogleCallback from './pages/GoogleCallback';
+import Login from './pages/Login';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { state } = useAuth();
@@ -63,6 +64,7 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/chat" replace />} />
+          <Route path="/callback/auth/google" element={<GoogleCallback />} />
         </Routes>
       </Router>
     </AuthProvider>

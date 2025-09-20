@@ -7,7 +7,6 @@ from app.users.schemas import UserRead
 
 class ChatCreate(BaseModel):
     user_ids: List[UUID] 
-    name: Optional[str]
 
 class ChatRead(BaseModel):
     id: UUID

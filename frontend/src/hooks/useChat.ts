@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
-import { useChat as useChatContext } from '../context/ChatContext';
 import { chatAPI } from '../api/chat';
 import { messageAPI } from '../api/message';
+import { useChat as useChatContext } from '../context/ChatContext';
 
 export const useChat = () => {
   const { state, dispatch, getCurrentChat, getCurrentMessages } = useChatContext();
@@ -31,8 +30,9 @@ export const useChat = () => {
     if (!state.currentChatId) return;
 
     try {
-      const message = await messageAPI.sendMessage(state.currentChatId, content, files);
-      dispatch({ type: 'ADD_MESSAGE', payload: message });
+      // const message = await messageAPI.sendMessage(state.currentChatId, content, files);
+      await messageAPI.sendMessage(state.currentChatId, content, files);
+      //dispatch({ type: 'ADD_MESSAGE', payload: message });
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
@@ -41,8 +41,9 @@ export const useChat = () => {
 
   const updateMessage = async (messageId: string, content: string) => {
     try {
-      const updatedMessage = await messageAPI.updateMessage(messageId, content);
-      dispatch({ type: 'UPDATE_MESSAGE', payload: updatedMessage });
+      // const updatedMessage = await messageAPI.updateMessage(messageId, content);
+      await messageAPI.updateMessage(messageId, content);
+      //dispatch({ type: 'UPDATE_MESSAGE', payload: updatedMessage });
     } catch (error) {
       console.error('Error updating message:', error);
       throw error;
@@ -52,7 +53,8 @@ export const useChat = () => {
   const deleteMessage = async (messageId: string, chatId: string) => {
     try {
       await messageAPI.deleteMessage(messageId);
-      dispatch({ type: 'DELETE_MESSAGE', payload: { chatId, messageId } });
+      console.log(chatId);
+      //dispatch({ type: 'DELETE_MESSAGE', payload: { chatId, messageId } });
     } catch (error) {
       console.error('Error deleting message:', error);
       throw error;

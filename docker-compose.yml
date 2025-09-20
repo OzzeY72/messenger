@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: messenger_db
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: messenger_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://myuser:mypassword@db:5432/mydb
+      SECRET_KEY: 9133215adb0d457d84bdb20660a5513820de1646603a4860f902987c3dff6236
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 240
+
+      GOOGLE_CLIENT_ID: 1069012702745-cpjtta5403rmkv2ie7udd00tadcaemmp.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_REDIRECT_URI: http://localhost:8000/callback/auth/google
+
+      UPLOAD_DIR: /app/backend/uploads
+    # env_file:
+    #   - ./backend/.env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+
+
+  

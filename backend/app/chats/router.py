@@ -1,40 +1,37 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, WebSocketDisconnect, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Dict, List
 from uuid import UUID
 
+from app.chats.deps import get_chat_service
 from app.database import get_db
 from app.utils.security import get_current_user
 from app.chats.service import ChatService
 from app.chats.schemas import ChatCreate, ChatRead
+from app.messages.deps import get_message_service
+from app.messages.service import MessageService
 
 router = APIRouter()
 
 @router.post("/", response_model=ChatRead, status_code=status.HTTP_201_CREATED)
 async def create_chat(
     chat_in: ChatCreate,
-    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
-    New chat creation
+    New chat creation (delegates all logic to service)
     """
-    if current_user.id not in chat_in.user_ids:
-        chat_in.user_ids.append(current_user.id) 
-
-    service = ChatService(db)
-    chat = await service.create_chat(chat_in)
-    ret = await service.get_chat_for_user(chat.id, current_user.id)
-    return ret
+    return await service.create_chat(chat_in, current_user.id)
 
 @router.get("/", response_model=list[ChatRead])
 async def get_my_chats(
-    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
     Get all user's chats
     """
-    service = ChatService(db)
     chats = await service.get_user_chats(current_user.id)
     return chats
 
@@ -42,13 +39,12 @@ async def get_my_chats(
 @router.get("/{chat_id}", response_model=ChatRead)
 async def get_chat(
     chat_id: UUID,
-    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
+    service: ChatService = Depends(get_chat_service)
 ):
     """
     Get chat by ID.
     """
-    service = ChatService(db)
     chat = await service.get_chat_for_user(chat_id, current_user.id)
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found or access denied")

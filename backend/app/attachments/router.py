@@ -33,7 +33,9 @@ async def get_attachment(
     service: AttachmentService = Depends(get_attachment_service)
 ):
     file_path, media_type = await service.get_attachment_file(attachment_id)
-
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
     return FileResponse(file_path, media_type=media_type)
 
 @router.post("/{message_id}", response_model=AttachmentRead)
@@ -41,18 +43,18 @@ async def upload_attachment(
     message_id: UUID,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    service: AttachmentService = Depends(get_attachment_service)
 ):
     await verify_message_owner(message_id, current_user.id, db)
-    # Saving file
+    # Saving file f
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
 
     file_size = str(os.path.getsize(file_path))
-
-    repo = AttachmentRepository(db)
-    return await repo.create(
+    
+    return await service.create(
         message_id=message_id,
         file_path=file_path,
         file_type=file.content_type,

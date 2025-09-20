@@ -7,6 +7,8 @@ from app.users.models import User
 from dotenv import load_dotenv
 
 from app.chats.repository import ChatRepository
+from app.attachments.models import Attachment
+from app.messages.schemas import AttachmentRead
 
 load_dotenv()
 
@@ -20,20 +22,26 @@ class AttachmentService:
         self.chat_repo = chat_repo
         print(f"AttachmentService created: db={db}, user={current_user.id}, chat_repo={chat_repo}")
 
+    async def create(self, message_id, file_path, file_size, file_type=None, id=None) -> AttachmentRead:
+        attachment = await self.repo.create(message_id, file_path, file_size, file_type, id=id)
+        print(attachment.message_id, attachment.file_path, "FFFF")
+        return attachment
+
     async def get_attachment_file(self, attachment_id: UUID) -> str:
         attachment = await self.repo.get_by_id(attachment_id)
         if not attachment:
             raise HTTPException(status_code=404, detail="Attachment not found")
-        
+        print("CHECKPOINT1")
         message = await self.repo.get_message_for_attachment(attachment_id)
         if not message:
             raise HTTPException(status_code=404, detail="Message not found")
-        
+        print("CHECKPOINT2")
         await verify_chat_membership(message.chat_id, self.current_user.id, self.chat_repo)
-
+        print("CHECKPOINT3")
         # Give path of file to ours route handler
         file_path = os.path.join(UPLOAD_DIR, attachment.file_path)
         if not os.path.exists(file_path):
             raise HTTPException(status_code=404, detail="File not found")
 
+        print(file_path, attachment.file_type, "TESTVALUE")
         return file_path, attachment.file_type

@@ -1,5 +1,5 @@
-import { axiosInstance } from '../utils/axios';
 import type { Chat } from '../types';
+import { axiosInstance } from '../utils/axios';
 
 export const chatAPI = {
   async fetchChats(): Promise<Chat[]> {
@@ -9,7 +9,7 @@ export const chatAPI = {
 
   async createChat(userIds: string[]): Promise<Chat> {
     const response = await axiosInstance.post('/chats', {
-      participant_ids: userIds,
+      user_ids: userIds,
     });
     return response.data;
   },

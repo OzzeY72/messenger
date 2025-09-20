@@ -1,4 +1,5 @@
 from typing import Dict
+from fastapi import HTTPException
 import httpx
 import os
 from dotenv import load_dotenv
@@ -38,7 +39,10 @@ class GoogleOAuth:
                 headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
             if resp.status_code != 200:
-                raise ValueError(f"Google token exchange failed: {resp.text}")
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Google token exchange failed: {resp.text}",
+                )
 
             token_data = resp.json()
             userInfo = await self._decode_id_token(token_data["id_token"])

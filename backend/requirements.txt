@@ -1,0 +1,13 @@
+fastapi
+pyjwt
+passlib[bcrypt]
+pydantic
+starlette
+httpx
+uvicorn 
+psycopg2-binary
+sqlalchemy[asyncio] 
+alembic 
+python-dotenv
+asyncpg
+fastapi[standard]

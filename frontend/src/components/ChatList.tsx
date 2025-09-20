@@ -1,9 +1,10 @@
+import { Plus, Search, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Search, Plus, User } from 'lucide-react';
-import { useChat } from '../hooks/useChat';
-import { useAuth } from '../hooks/useAuth';
 import { chatAPI } from '../api/chat';
-import type { Chat, User as UserType } from '../types';
+import { userAPI } from '../api/user';
+import { useAuth } from '../hooks/useAuth';
+import { useChat } from '../hooks/useChat';
+import type { User as UserType } from '../types';
 
 const ChatList: React.FC = () => {
   const { chats, currentChatId, selectChat, loadChats } = useChat();
@@ -30,7 +31,7 @@ const ChatList: React.FC = () => {
     }
     
     try {
-      const results = await chatAPI.searchUsers(query);
+      const results = await userAPI.searchUsers(query);
       setSearchResults(results.filter(user => user.id !== authState.user?.id));
     } catch (error) {
       console.error('Error searching users:', error);

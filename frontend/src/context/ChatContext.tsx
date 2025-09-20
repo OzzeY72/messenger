@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import type { ChatState, ChatAction, Chat, Message } from '../types';
+import type { Chat, ChatAction, ChatState, Message } from '../types';
 
 const initialState: ChatState = {
   chats: [],
@@ -91,7 +91,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!state.currentChatId) return [];
     return state.messages[state.currentChatId] || [];
   };
-
+  
   return (
     <ChatContext.Provider value={{ state, dispatch, getCurrentChat, getCurrentMessages }}>
       {children}

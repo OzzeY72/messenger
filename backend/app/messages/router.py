@@ -14,7 +14,7 @@ from app.messages.utils import verify_message_owner
 from app.chats.deps import get_chat_repo
 from app.chats.repository import ChatRepository
 
-from .schemas import MessageCreate, MessageRead, MessageUpdate
+from .schemas import MessageRead, MessageUpdate
 from .repository import MessageRepository
 
 router = APIRouter()
@@ -24,59 +24,42 @@ async def send_message(
     chat_id: UUID = Form(...),
     content: Optional[str] = Form(None),
     files: List[UploadFile] = File([]),
-    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    chat_repo: ChatRepository = Depends(get_chat_repo),
     service: MessageService = Depends(get_message_service),
 ):
-    await verify_chat_membership(chat_id, current_user.id, chat_repo)
-
-    repo = MessageRepository(db)
-    message = await repo.create(
-        sender_id=current_user.id,
-        data={"chat_id": chat_id, "content": content},
+    return await service.send_message(
+        chat_id=chat_id,
+        content=content,
+        files=files,
+        current_user=current_user,
     )
-    
-    if files:
-        attachments = await service.save_attachments(message.id, files)
-        message.attachments = attachments
-
-    return message
 
 @router.put("/{message_id}", response_model=MessageRead)
 async def update_message(
     message_id: UUID,
     data: MessageUpdate,
-    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    service: MessageRepository = Depends(get_message_service)
 ):
-    message = await verify_message_owner(message_id, current_user.id, db)
-    repo = MessageRepository(db)
-
-    return await repo.update(message, data.content)
+    return await service.update(message_id, current_user.id, data.content)
 
 
 @router.get("/chat/{chat_id}", response_model=List[MessageRead])
 async def get_messages_by_chat(
     chat_id: UUID,
-    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    chat_repo: ChatRepository = Depends(get_chat_repo)
+    service: MessageRepository = Depends(get_message_service)
 ):
-    await verify_chat_membership(chat_id, current_user.id, chat_repo)
-
-    repo = MessageRepository(db)
-    return await repo.get_message_with_attachments(chat_id=chat_id)
-
+    return await service.get_message_with_attachments(
+        chat_id=chat_id, 
+        current_user_id=current_user.id
+    )
 
 @router.delete("/{message_id}")
 async def delete_message(
     message_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    service: MessageRepository = Depends(get_message_service)
 ):
-    message = await verify_message_owner(message_id, current_user.id, db)
-    repo = MessageRepository(db)
-    
-    await repo.delete(message)
+    await service.delete(message_id, current_user_id=current_user.id)
     return {"detail": "Message deleted"}

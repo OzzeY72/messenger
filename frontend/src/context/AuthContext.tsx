@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import type { AuthState, AuthAction, User } from '../types';
+import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { authAPI } from '../api/auth';
+import type { AuthAction, AuthState } from '../types';
 
 const initialState: AuthState = {
   user: null,
@@ -80,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginOAuth = async (provider: string, token: string) => {
     try {
       const response = await authAPI.loginOAuth(provider, token);
+      console.log(response);
       localStorage.setItem('authToken', response.access_token);
       dispatch({ type: 'SET_USER', payload: { user: response.user, token: response.access_token } });
     } catch (error) {
@@ -98,14 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('authToken');
-      dispatch({ type: 'LOGOUT' });
-    }
+    localStorage.removeItem('authToken');
+    dispatch({ type: 'LOGOUT' });
   };
 
   return (

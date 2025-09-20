@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from app.chats.repository import ChatRepository
 from sqlalchemy.dialects.postgresql import UUID
 from app.chats.models import Chat
@@ -10,77 +11,32 @@ from sqlalchemy.orm import selectinload
 
 from app.users.models import User
 from app.users.schemas import UserRead
+from app.users.service import UserService
 
 class ChatService:
-    def __init__(self, db: AsyncSession):
-        self.repo = ChatRepository(db)
+    def __init__(self, chat_repo: ChatRepository):
+        self.repo = chat_repo
 
-    async def create_chat(self, chat_in: ChatCreate):
-        chat = Chat(name=chat_in.name)
-        return await self.repo.create(chat, chat_in.user_ids)
+    async def create_chat(self, chat_in: ChatCreate, current_user_id: UUID):
+        user_ids = list(set(chat_in.user_ids))
+        if current_user_id not in user_ids:
+            user_ids.append(current_user_id)
+
+        # Check if chat with this user exist 
+        existing_chat = await self.repo.find_chat_by_users(user_ids)
+        if existing_chat:
+            raise HTTPException(
+                status_code=400,
+                detail="Chat with these users already exists"
+            )
+
+        chat = Chat(name="")
+        new_chat = await self.repo.create(chat, user_ids)
+
+        return await self.get_chat_for_user(new_chat.id, current_user_id)
     
     async def get_user_chats(self, user_id: UUID):
-        subq = (
-            select(chat_members_table.c.chat_id)
-            .where(chat_members_table.c.user_id == user_id)
-            .subquery()
-        )
-
-        result = await self.repo.db.execute(
-            select(Chat, User)
-            .join(chat_members_table, chat_members_table.c.chat_id == Chat.id)
-            .join(User, chat_members_table.c.user_id == User.id)
-            .where(Chat.id.in_(select(subq.c.chat_id)))
-        )
-
-        rows = result.all()
-        chats_dict: dict[UUID, ChatRead] = {}
-
-        for chat, member in rows:
-            if chat.id not in chats_dict:
-                chats_dict[chat.id] = ChatRead(
-                    id=chat.id,
-                    name=chat.name,
-                    members=[],
-                    created_at=chat.created_at,
-                )
-            chats_dict[chat.id].members.append(UserRead(
-                id=member.id,
-                name=member.name,
-                email=member.email
-            ))
-
-        return list(chats_dict.values())
+        return await self.repo.get_user_chats(user_id)
 
     async def get_chat_for_user(self, chat_id: UUID, user_id: UUID):
-        chat = await self.repo.get(chat_id)
-        if not chat:
-            return None
-
-        result = await self.repo.db.execute(
-            select(chat_members_table).where(
-                chat_members_table.c.chat_id == chat_id,
-                chat_members_table.c.user_id == user_id,
-            )
-        )
-        if not result.first():
-            return None
-
-        members_result = await self.repo.db.execute(
-            select(User)
-            .join(chat_members_table, chat_members_table.c.user_id == User.id)
-            .where(chat_members_table.c.chat_id == chat_id)
-        )
-        members = members_result.scalars().all()
-        member_schemas = [UserRead(
-            id=m.id,
-            name=m.name,
-            email=m.email
-        ) for m in members]
-
-        return ChatRead(
-            id=chat.id,
-            name=chat.name,
-            members=member_schemas,
-            created_at=chat.created_at,
-        )
+        return await self.repo.get_chat_for_user(chat_id, user_id)

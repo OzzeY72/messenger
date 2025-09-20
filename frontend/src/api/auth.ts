@@ -1,5 +1,5 @@
-import { axiosInstance } from '../utils/axios';
 import type { User } from '../types';
+import { axiosInstance } from '../utils/axios';
 
 interface LoginResponse {
   user: User;
@@ -15,13 +15,15 @@ export const authAPI = {
     return response.data;
   },
 
-  async loginOAuth(auth_provider: string, provider_id: string): Promise<LoginResponse> {
+  async loginOAuth(auth_provider: string, code: string): Promise<LoginResponse> {
     const response = await axiosInstance.post('/auth/login/oauth', {
-      auth_provider,
-      provider_id,
+      provider_id: code,
+      auth_provider: auth_provider,
     });
+
     return response.data;
   },
+
 
   async register(email: string, password: string, name: string): Promise<LoginResponse> {
     const response = await axiosInstance.post('/auth/register/email', {

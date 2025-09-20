@@ -16,14 +16,6 @@ class MessageCreate(BaseModel):
 class MessageUpdate(BaseModel):
     content: str
 
-class AttachmentRead(BaseModel):
-    id: UUID
-    file_path: str
-    file_type: str
-
-    class Config:
-        orm_mode = True
-
 class MessageRead(BaseModel):
     id: UUID
     chat_id: UUID

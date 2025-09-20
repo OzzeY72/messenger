@@ -7,9 +7,9 @@ from app.auth.providers.oauth_factory import get_oauth_provider
 from . import schemas
 
 class AuthService:
-    def __init__(self, db: AsyncSession):
-        self.repo = UserRepository(db)
-        self.user_service = UserService(db)
+    def __init__(self, repo: UserRepository, user_service: UserService):
+        self.repo = repo
+        self.user_service = user_service
 
     async def register_email(self, data: schemas.RegisterEmail):
         hashed_pw = hash_password(data.password)

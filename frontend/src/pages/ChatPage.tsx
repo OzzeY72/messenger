@@ -1,11 +1,13 @@
-import React from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { LogOut } from 'lucide-react';
+import React from 'react';
 import ChatList from '../components/ChatList';
 import ChatWindow from '../components/ChatWindow';
+import { useAuth } from '../hooks/useAuth';
+import { useChatWS } from '../hooks/useWs';
 
 const ChatPage: React.FC = () => {
   const { state: authState, logout } = useAuth();
+  useChatWS();
 
   const handleLogout = async () => {
     if (window.confirm('Вы уверены, что хотите выйти?')) {

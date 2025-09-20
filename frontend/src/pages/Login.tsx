@@ -1,7 +1,7 @@
+import { Eye, EyeOff, Lock, Mail, MessageCircle, User } from 'lucide-react';
 import React, { useState } from 'react';
-import { MessageCircle, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -33,10 +33,16 @@ const Login: React.FC = () => {
       setIsLoading(false);
     }
   };
-
+  const redirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI
   const handleGoogleLogin = () => {
-    // Здесь будет реализация Google OAuth
-    alert('Google OAuth will be implemented here');
+    const params = new URLSearchParams({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      response_type: "code",
+      scope: "openid email profile",
+      access_type: "offline",
+      prompt: "consent",
+    });
+    window.location.href =`https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${redirectUri}&${params.toString()}`;
   };
 
   return (

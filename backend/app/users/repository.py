@@ -15,6 +15,12 @@ class UserRepository:
         result = await self.db.execute(select(User).where(User.email == email))
         return result.scalars().first()
 
+    async def search_by_name(self, query: str, limit: int = 10) -> list[User]:
+        result = await self.db.execute(
+            select(User).where(User.name.ilike(f"%{query}%")).limit(limit)
+        )
+        return result.scalars().all()
+
     async def create(self, user: User):
         self.db.add(user)
         print("Added", user)

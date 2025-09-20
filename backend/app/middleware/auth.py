@@ -8,7 +8,7 @@ from app.utils.security import get_current_user
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        open_paths = {"/login", "/register", "/docs", "/openapi.json"}
+        open_paths = {"/api/login", "/api/register", "/docs", "/openapi.json"}
         
         if request.url.path in open_paths:
             return await call_next(request)

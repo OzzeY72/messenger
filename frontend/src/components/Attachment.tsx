@@ -1,8 +1,8 @@
+import { Download, File } from 'lucide-react';
 import React from 'react';
-import { Download, File, Image } from 'lucide-react';
-import type { Attachment as AttachmentType } from '../types';
 import { attachmentAPI } from '../api/attachment';
 import { useProtectedFile } from "../hooks/useProtectedFile";
+import type { Attachment as AttachmentType } from '../types';
 
 interface AttachmentProps {
   attachment: AttachmentType;
